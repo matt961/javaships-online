@@ -1,42 +1,82 @@
-package server; /**
+/**
  * Created by Matt on 11/21/2016.
  */
+package server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Date;
 
 public class JavashipsServer {
-	private static final int PORT = 9876;
-	private static int numberOfConnections = 0;
+    enum MessageType {
+        ATTACK ("ATTACK");
 
-	private ServerSocket incoming;
+        private final String type;
+        MessageType (final String type) {
+            this.type = type;
+        }
+    }
 
-	private JavashipsServer() {
-		try {
-			incoming = new ServerSocket(PORT);
-		} catch (IOException ioe) {
-			System.err.println(ioe.toString() + '\n');
-			ioe.printStackTrace();
-		}
-	}
+    private static final int PORT = 9876;
 
-	public void connectPlayers() {
-		while (numberOfConnections < 2) {
-			try {
-				new Thread(new JavashipsConnectionHandler(incoming.accept())).run();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    private JavashipsServer() {
+        try {
+            ServerSocket server = new ServerSocket(PORT);
 
-	public static void tellServer(final String command) {
+            System.out.println("Waiting for 2 players to connect.");
+            Player player1 = new Player(server.accept());
+            Player player2 = new Player(server.accept());
+            server.close();
+            // done getting players
 
-	}
+            player1.setOppenent(player2);
+            player2.setOppenent(player1);
 
-	public static void main(String[] args) {
-		JavashipsServer jss = new JavashipsServer();
-	}
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+
+    }
+
+    public static void main(String[] args) {
+        new JavashipsServer();
+        System.out.println(new Date().toString() + " - Started server!");
+    }
+
+    /**
+     * Created by Matt on 11/21/2016.
+     */
+    class Player extends Thread {
+
+        private Socket fromClient;
+
+        private Player opponent;
+
+        private BufferedReader commandReader;
+
+        Player (final Socket fromClient) throws IOException {
+            this.fromClient = fromClient;
+            commandReader = new BufferedReader(
+                    new InputStreamReader(fromClient.getInputStream()));
+        }
+
+        void setOppenent (final Player opponent) {
+            this.opponent = opponent;
+        }
+
+        void attackOpponent (final int x, final int y) {
+
+        }
+
+        @Override
+        public void run() {
+
+        }
+    }
 }
 
 
