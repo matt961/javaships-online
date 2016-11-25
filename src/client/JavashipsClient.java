@@ -1,4 +1,4 @@
-package battleship;
+package client;
 
 import java.awt.EventQueue;
 
@@ -10,57 +10,37 @@ import javax.swing.KeyStroke;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
 import javax.swing.JLabel;
-import java.awt.Panel;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextPane;
-import javax.swing.JSeparator;
-import javax.swing.JToolBar;
-import javax.swing.border.TitledBorder;
-import javax.swing.UIManager;
 import java.awt.Color;
-import javax.swing.JTable;
 import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import java.awt.Component;
 import java.awt.Label;
 import javax.swing.border.LineBorder;
 import java.awt.SystemColor;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 
 import java.awt.Button;
 import java.awt.Font;
 import javax.swing.border.CompoundBorder;
 import javax.swing.SwingConstants;
-import javax.swing.JComboBox;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.JLayeredPane;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.ImageIcon;
-import java.awt.event.MouseMotionAdapter;
-
-public class battleshipClient {
-
+public class JavashipsClient {
+    // create variables for grids and buttons
     public GridValue[][] OppGrid;
     public JButton[][] OppButtons;
     public GridValue[][] PlayerGrid;
     public JButton[][] PlayerButtons;
     public JButton[] shipButtons = new JButton[5];
-    // create variables for grids and buttons
+
     JTextArea ChatArea;
+
     // create state variables for game play
     private GameState gameState = GameState.NOGAME;
     private GridValue placeState = GridValue.EMPTY;
@@ -73,7 +53,7 @@ public class battleshipClient {
     /**
      * Create the application.
      */
-    public battleshipClient() {
+    public JavashipsClient() {
         initialize();
     }
 
@@ -84,7 +64,7 @@ public class battleshipClient {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    battleshipClient window = new battleshipClient();
+                    JavashipsClient window = new JavashipsClient();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
