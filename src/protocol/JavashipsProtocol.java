@@ -9,7 +9,6 @@ package protocol;
 public final class JavashipsProtocol {
     public static enum MESSAGE {
         GAMEOVER,
-        READY,
         ATTACK
     }
 }
