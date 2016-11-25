@@ -1,5 +1,6 @@
-
 package server;
+
+import protocol.JavashipsProtocol;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,6 +31,9 @@ public class JavashipsServer {
             player1.setOpponent(player2);
             player2.setOpponent(player1);
 
+            player1.start();
+            player2.start();
+
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -57,8 +61,8 @@ public class JavashipsServer {
         /**
          * @param playerSocket The client's socket used for receiving and
          *                     sending commands.
-         * @param turn The first player to connect gets "true" and the last
-         *             player to connect gets "false"
+         * @param turn         The first player to connect gets "true" and the last
+         *                     player to connect gets "false"
          * @throws IOException
          */
         Player(final Socket playerSocket, final boolean turn) throws IOException {
@@ -71,7 +75,6 @@ public class JavashipsServer {
         }
 
         /**
-         *
          * @param opponentPlayer This player's opponent. The player echoes
          *                       a command received to the opponent for parsing.
          * @throws IOException
@@ -96,7 +99,6 @@ public class JavashipsServer {
         }
 
         /**
-         *
          * @return The command that this Player's client sends.
          * @throws IOException
          */
@@ -105,7 +107,6 @@ public class JavashipsServer {
         }
 
         /**
-         *
          * @param command The command that getCommandFromPlayer
          *                receives is to be sent to the opponent's
          *                client for parsing.
@@ -122,8 +123,11 @@ public class JavashipsServer {
                 if (turn) {
                     try {
                         String command = getCommandFromPlayer();
-
                         sendCommandToOpponent(command);
+
+                        if (command.startsWith(JavashipsProtocol.MESSAGE.GAMEOVER.toString())) {
+                            return;
+                        }
 
                         changeTurns();
                     } catch (IOException e) {
@@ -142,5 +146,3 @@ public class JavashipsServer {
         }
     }
 }
-
-

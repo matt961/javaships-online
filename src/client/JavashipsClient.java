@@ -1,5 +1,7 @@
 package client;
 
+import protocol.JavashipsProtocol;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -28,10 +30,18 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
 public class JavashipsClient {
+    // Use these for communicating with your opponent.
+    private Socket server;
+    private PrintWriter commandWriter;
+    private BufferedReader commandReader;
+
     // create variables for grids and buttons
     public GridValue[][] OppGrid;
     public JButton[][] OppButtons;
@@ -838,7 +848,8 @@ public class JavashipsClient {
         NOGAME,
         SETUP,
         PLAY,
-        GAMEOVER, WAIT
+        GAMEOVER,
+        WAIT
     }
 
     private enum Orientation {
