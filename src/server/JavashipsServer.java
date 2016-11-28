@@ -1,6 +1,7 @@
 package server;
 
 import protocol.JavashipsProtocol;
+import protocol.JavashipsProtocol.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,138 +12,130 @@ import java.net.Socket;
 import java.util.Date;
 
 public class JavashipsServer {
-    private static final int PORT = 9876;
+	private static final int PORT = 9876;
 
-    /**
-     * The main method creates a new JavashipsServer
-     * that facilitates the message passing between
-     * clients. All game logic is processed client-side.
-     */
-    private JavashipsServer() {
-        try {
-            ServerSocket server = new ServerSocket(PORT);
+	/**
+	 * The main method creates a new JavashipsServer
+	 * that facilitates the sendMessage passing between
+	 * clients. All game logic is processed client-side.
+	 */
+	private JavashipsServer() {
+		try {
+			PrintWriter serverWriter;
 
-            System.out.println("Waiting for 2 players to connect.");
-            Player player1 = new Player(server.accept(), true);
-            Player player2 = new Player(server.accept(), false);
-            server.close();
-            // done getting players
+			ServerSocket server = new ServerSocket(PORT);
 
-            player1.setOpponent(player2);
-            player2.setOpponent(player1);
+			System.out.println("Waiting for 2 players to connect.");
 
-            player1.start();
-            player2.start();
+			Player player1 = new Player(server.accept());
+			System.out.println(new Date().toString() +
+					" - First player has been found: " +
+					player1.playerSocket.getInetAddress().getHostAddress() +
+					"/" +
+					player1.playerSocket.getPort());
 
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-    }
+			Player player2 = new Player(server.accept());
+			System.out.println(new Date().toString() +
+					" - Second player has been found: " +
+					player2.playerSocket.getInetAddress().getHostAddress() +
+					"/" +
+					player2.playerSocket.getPort());
 
-    public static void main(String[] args) {
-        new JavashipsServer();
-        System.out.println(new Date().toString() + " - Started server!");
-    }
+			server.close();
+			// done getting players
 
-    /**
-     * Created by Matt on 11/21/2016.
-     */
-    class Player extends Thread {
-        private boolean turn;
+			serverWriter = new PrintWriter(player1.playerSocket.getOutputStream());
+			serverWriter.println();
 
-        private Socket playerSocket;
+			player1.setOpponent(player2);
+			player2.setOpponent(player1);
 
-        private Player opponentPlayer;
+			player1.start();
+			player2.start();
 
-        private BufferedReader commandReader;
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+	}
 
-        private PrintWriter toOpponentCommandWriter;
+	public static void main(String[] args) {
+		System.out.println(new Date().toString() + " - Started server!");
+		new JavashipsServer();
+	}
 
-        /**
-         * @param playerSocket The client's socket used for receiving and
-         *                     sending commands.
-         * @param turn         The first player to connect gets "true" and the last
-         *                     player to connect gets "false"
-         * @throws IOException
-         */
-        Player(final Socket playerSocket, final boolean turn) throws IOException {
-            this.playerSocket = playerSocket;
+	/**
+	 * Created by Matt on 11/21/2016.
+	 */
+	class Player extends Thread {
 
-            this.turn = turn;
+		private Socket playerSocket;
 
-            commandReader = new BufferedReader(
-                    new InputStreamReader(playerSocket.getInputStream()));
-        }
+		private Player opponentPlayer;
 
-        /**
-         * @param opponentPlayer This player's opponent. The player echoes
-         *                       a command received to the opponent for parsing.
-         * @throws IOException
-         */
-        void setOpponent(final Player opponentPlayer) throws IOException {
-            this.opponentPlayer = opponentPlayer;
+		private BufferedReader commandReader;
 
-            this.toOpponentCommandWriter = new PrintWriter(
-                    getOpponentSocket().getOutputStream());
-        }
+		private PrintWriter toOpponentCommandWriter;
 
-        /**
-         * Let the other player receive and send a command.
-         */
-        void changeTurns() {
-            opponentPlayer.turn = true;
-            this.turn = false;
-        }
+		/**
+		 * @param playerSocket The client's socket used for receiving and
+		 *                     sending commands.
+		 * @throws IOException
+		 */
+		Player(final Socket playerSocket) throws IOException {
+			this.playerSocket = playerSocket;
 
-        Socket getOpponentSocket() {
-            return opponentPlayer.playerSocket;
-        }
+			commandReader = new BufferedReader(
+					new InputStreamReader(playerSocket.getInputStream()));
+		}
 
-        /**
-         * @return The command that this Player's client sends.
-         * @throws IOException
-         */
-        String getCommandFromPlayer() throws IOException {
-            return commandReader.readLine();
-        }
+		/**
+		 * @param opponentPlayer This player's opponent. The player echoes
+		 *                       a command received to the opponent for parsing.
+		 * @throws IOException
+		 */
+		void setOpponent(final Player opponentPlayer) throws IOException {
+			this.opponentPlayer = opponentPlayer;
 
-        /**
-         * @param command The command that getCommandFromPlayer
-         *                receives is to be sent to the opponent's
-         *                client for parsing.
-         * @throws IOException
-         */
-        void sendCommandToOpponent(final String command) throws IOException {
-            toOpponentCommandWriter.println(command);
-            toOpponentCommandWriter.flush();
-        }
+			this.toOpponentCommandWriter = new PrintWriter(
+					getOpponentSocket().getOutputStream());
+		}
 
-        @Override
-        public void run() {
-            while (true) {
-                if (turn) {
-                    try {
-                        String command = getCommandFromPlayer();
-                        sendCommandToOpponent(command);
+		Socket getOpponentSocket() {
+			return opponentPlayer.playerSocket;
+		}
 
-                        if (command.startsWith(JavashipsProtocol.MESSAGE.GAMEOVER.toString())) {
-                            return;
-                        }
+		/**
+		 * @return The command that this Player's client sends.
+		 * @throws IOException
+		 */
+		String getCommandFromPlayer() throws IOException {
+			return commandReader.readLine();
+		}
 
-                        changeTurns();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        System.err.println(new Date().toString() + " - Connection lost.");
-                        System.exit(1);
-                    }
-                } else {
-                    try {
-                        sleep(2000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
+		/**
+		 * @param command The command that getCommandFromPlayer
+		 *                receives is to be sent to the opponent's
+		 *                client for parsing.
+		 * @throws IOException
+		 */
+		void sendCommandToOpponent(final String command) throws IOException {
+			toOpponentCommandWriter.println(command);
+			toOpponentCommandWriter.flush();
+		}
+
+		@Override
+		public void run() {
+			while (true) {
+				try {
+					String command = getCommandFromPlayer();
+					System.out.println(new Date().toString() + " :: " + command);
+					sendCommandToOpponent(command);
+
+				} catch (IOException e) {
+					System.err.println(new Date().toString() + " - Connection lost.");
+					return;
+				}
+			}
+		}
+	}
 }
