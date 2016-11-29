@@ -37,11 +37,10 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
-import sun.plugin2.message.JavaScriptBaseMessage;
 
 public class JavashipsClient {
 
-	boolean hasConnection;
+	boolean hasConnection = false;
 	// Use these for communicating with your opponent.
 	private Socket server;
 	private PrintWriter commandWriter;
