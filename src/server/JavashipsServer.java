@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.Date;
 
 public class JavashipsServer {
-    private static final int PORT = 9876;
+    private final int PORT = 9876;
 
     /**
      * The main method creates a new JavashipsServer
