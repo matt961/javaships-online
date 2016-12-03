@@ -481,9 +481,9 @@ public class JavashipsClient {
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 OppGrid[i][j] = GridValue.EMPTY;
-                JButton b = new JButton("");
-                OppButtons[i][j] = b;
-                OppButtons[i][j].setEnabled(false);
+				JButton button = new JButton("");
+				OppButtons[i][j] = button;
+				OppButtons[i][j].setEnabled(false);
                 OppButtons[i][j].setBorder(new LineBorder(new Color(0, 0, 0)));
                 //OppButtons[i][j].setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), new LineBorder(new Color(255, 255, 255), 2)));
                 OppButtons[i][j].setBackground(SystemColor.window);
@@ -502,9 +502,9 @@ public class JavashipsClient {
                                 // ANYTHING WITH OPPONENTS GRID IN SETUP.
                                 break;
                             case PLAY:
-                                b.setBackground(GridColor.SELECTED.c);
-                                // SEND MOUSE OVER VALUE TO OPPONENT FOR FEAR FACTOR.
+								button.setBackground(GridColor.SELECTED.c);
 
+                                // SEND MOUSE OVER VALUE TO OPPONENT FOR FEAR FACTOR.
 								//TODO: sendSeek
 								JButton clicked = (JButton) evt.getSource();
 
@@ -536,8 +536,10 @@ public class JavashipsClient {
                                 break;
                             case PLAY:
                                 // Set state back to normal
-                                b.setBackground(GridColor.EMPTY.c);
-                                break;
+								button.setBackground(GridColor.EMPTY.c);
+
+								sendRedraw(commandWriter);
+								break;
                             case GAMEOVER:
                                 break;
                         }
@@ -555,8 +557,8 @@ public class JavashipsClient {
                                 // ANYTHING WITH OPPONENTS GRID IN SETUP.
                                 break;
                             case PLAY:
-                                b.setBackground(GridColor.HIT.c);
-                                // SEND MOUSE CLICK VALUE TO OPPONENT.
+								button.setBackground(GridColor.HIT.c);
+								// SEND MOUSE CLICK VALUE TO OPPONENT.
                                 break;
                             case GAMEOVER:
                                 break;
@@ -643,9 +645,11 @@ public class JavashipsClient {
 						int x = Integer.parseInt(receivedParsed[1]);
 						int y = Integer.parseInt(receivedParsed[2]);
 
-						//TODO uh oh!
-						PlayerGrid[x][y] = GridValue.SEEKING;
+						PlayerButtons[x][y].setBackground(GridColor.SEEKING.c);
 					}
+					case REDRAW:
+						draw();
+						break;
 					case QUIT:
                         quitGame();
 						return;

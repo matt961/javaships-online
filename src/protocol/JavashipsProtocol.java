@@ -13,7 +13,8 @@ public final class JavashipsProtocol {
     public static final String QUIT = "quit";
     public static final String ATTACK = "attack";
     public static final String SEEKING = "seek";
-    public static final String FIRST = "first";
+	public static final String REDRAW = "rd";
+	public static final String FIRST = "first";
     public static final String MESSAGE = "msg";
 
     public static final String SEPARATOR = "-";
@@ -38,7 +39,9 @@ public final class JavashipsProtocol {
     }
 
     /**
-     * @param sender The client's PrintWriter, which is connected to {@link server.JavashipsServer}.
+	 * Update the other client with the OppGrid position that attacking player moused over.
+	 *
+	 * @param sender The client's PrintWriter, which is connected to {@link server.JavashipsServer}.
      * @param x      The horizontal coordinate of the OppGrid in {@link client.JavashipsClient}
      *               that the player wishes to attack.
      * @param y      The vertical coordinate of the OppGrid in {@link client.JavashipsClient}
@@ -48,9 +51,24 @@ public final class JavashipsProtocol {
         sender.println(SEEKING + SEPARATOR + x + SEPARATOR + y);
     }
 
-    public static void sendQuit(PrintWriter sender) {
-        sender.println(QUIT);
-    }
+	/**
+	 * Make the other client quit their game.
+	 *
+	 * @param sender The client's PrintWriter, which is connected to {@link server.JavashipsServer}.
+	 */
+	public static void sendQuit(PrintWriter sender) {
+		sender.println(QUIT);
+	}
+
+	/**
+	 * For restoring the ship placement colors on the opponent's PlayerButtons grid after the SEEKING position
+	 * has changed.
+	 *
+	 * @param sender
+	 */
+	public static void sendRedraw(PrintWriter sender) {
+		sender.println(REDRAW);
+	}
 }
 
 class BadMessageException extends Exception {
