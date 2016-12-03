@@ -8,6 +8,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="TEST" name="junit4-4.12" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="junit4-4.12" level="project" />
+    <orderEntry type="library" name="junit-4.12" level="application" />
   </component>
 </module>

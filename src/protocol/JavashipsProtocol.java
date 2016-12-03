@@ -45,7 +45,7 @@ public final class JavashipsProtocol {
      *               that the player wishes to attack.
      */
     public static void sendSeek(PrintWriter sender, final int x, final int y) {
-        sender.println(SEEKING + "." + x + "." + y);
+        sender.println(SEEKING + SEPARATOR + x + SEPARATOR + y);
     }
 
     public static void sendQuit(PrintWriter sender) {

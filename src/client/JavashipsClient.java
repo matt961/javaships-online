@@ -124,9 +124,9 @@ public class JavashipsClient {
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 PlayerGrid[i][j] = GridValue.EMPTY;
-                JButton b = new JButton(i + "" + j);
-                PlayerButtons[i][j] = b;
-                PlayerButtons[i][j].setEnabled(false);
+				JButton button = new JButton(i + "" + j);
+				PlayerButtons[i][j] = button;
+				PlayerButtons[i][j].setEnabled(false);
                 PlayerButtons[i][j].setBorder(new LineBorder(new Color(0, 0, 0)));
                 //PlayerButtons[i][j].setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), new LineBorder(new Color(255, 255, 255), 2)));
                 PlayerButtons[i][j].setBackground(SystemColor.window);
@@ -142,20 +142,20 @@ public class JavashipsClient {
                                 // which
                                 switch (placeState) {
                                     case CARRIER:
-                                        shipOver(b, 5);
-                                        break;
+										shipOver(button, 5);
+										break;
                                     case BATTLESHIP:
-                                        shipOver(b, 4);
-                                        break;
+										shipOver(button, 4);
+										break;
                                     case CRUISER:
-                                        shipOver(b, 3);
-                                        break;
+										shipOver(button, 3);
+										break;
                                     case DESTROYER:
-                                        shipOver(b, 2);
-                                        break;
+										shipOver(button, 2);
+										break;
                                     case SUBMARINE:
-                                        shipOver(b, 3);
-                                        break;
+										shipOver(button, 3);
+										break;
                                     default:
                                         break;
                                 }
@@ -191,20 +191,20 @@ public class JavashipsClient {
                                 // which
                                 switch (placeState) {
                                     case CARRIER:
-                                        shipSet(b, 5);
-                                        break;
+										shipSet(button, 5);
+										break;
                                     case BATTLESHIP:
-                                        shipSet(b, 4);
-                                        break;
+										shipSet(button, 4);
+										break;
                                     case CRUISER:
-                                        shipSet(b, 3);
-                                        break;
+										shipSet(button, 3);
+										break;
                                     case DESTROYER:
-                                        shipSet(b, 2);
-                                        break;
+										shipSet(button, 2);
+										break;
                                     case SUBMARINE:
-                                        shipSet(b, 3);
-                                        break;
+										shipSet(button, 3);
+										break;
                                     default:
                                         break;
                                 }
@@ -504,7 +504,20 @@ public class JavashipsClient {
                             case PLAY:
                                 b.setBackground(GridColor.SELECTED.c);
                                 // SEND MOUSE OVER VALUE TO OPPONENT FOR FEAR FACTOR.
-                                break;
+
+								//TODO: sendSeek
+								JButton clicked = (JButton) evt.getSource();
+
+								for (int i = 0; i < 10; i++) {
+									for (int j = 0; j < 10; j++) {
+
+										if (PlayerButtons[i][j] == clicked) {
+											sendSeek(commandWriter, i, j);
+										}
+
+									}
+								}
+								break;
                             case GAMEOVER:
                                 break;
                         }
@@ -625,10 +638,18 @@ public class JavashipsClient {
                     case MESSAGE:
                         ChatArea.append("Opponent: " + receivedParsed[1] + "\n");
                         break;
-                    case QUIT:
+					//TODO receive SEEKING
+					case SEEKING: {
+						int x = Integer.parseInt(receivedParsed[1]);
+						int y = Integer.parseInt(receivedParsed[2]);
+
+						//TODO uh oh!
+						PlayerGrid[x][y] = GridValue.SEEKING;
+					}
+					case QUIT:
                         quitGame();
-                        break;
-                    default:
+						return;
+					default:
                         break;
                 }
             } catch (IOException e) {
@@ -661,7 +682,9 @@ public class JavashipsClient {
                     case SELECTED:
                         OppButtons[i][j].setBackground(GridColor.SELECTED.c);
                         break;
-                }
+					case SEEKING:
+						PlayerButtons[i][j].setBackground(GridColor.SEEKING.c);
+				}
                 // draw players grid
                 switch (PlayerGrid[i][j]) {
                     case EMPTY:
@@ -891,7 +914,8 @@ public class JavashipsClient {
         DESTROYER(4),
         EMPTY(5),
         HIT(6),
-        SELECTED(7);
+		SELECTED(7),
+		SEEKING(8);
 
         private final int num;
 
@@ -904,7 +928,8 @@ public class JavashipsClient {
     public enum GridColor {
         EMPTY(new Color(0x1C6BA0)),
         HIT(Color.RED),
-        SELECTED(SystemColor.LIGHT_GRAY);
+		SELECTED(SystemColor.LIGHT_GRAY),
+		SEEKING(SystemColor.ORANGE);
 
         private final Color c;
 
