@@ -11,13 +11,54 @@ import java.io.PrintWriter;
  */
 public final class JavashipsProtocol {
     public static final String QUIT = "quit";
-    public static final String ATTACK = "attack";
-    public static final String SEEKING = "seek";
-	public static final String REDRAW = "rd";
-	public static final String FIRST = "first";
     public static final String MESSAGE = "msg";
 
-    public static final String SEPARATOR = "-";
+	public static final String REDRAW = "r";
+
+	public static final String FIRST = "f";
+	public static final String SEEKING = "seek";
+	public static final String ATTACK = "atk";
+	public static final String HIT = "hit";
+	public static final String MISS = "miss";
+
+	public static final String SEPARATOR = "-";
+
+	/**
+	 * The player who is being attacked will send this message
+	 * to the attacking player with the coordinate that was a miss.
+	 *
+	 * @param sender
+	 * @param x      The horizontal coordinate.
+	 * @param y      The vertical coordinate.
+	 */
+	public static void sendMiss(PrintWriter sender, int x, int y) {
+		sender.println(MISS + SEPARATOR + x + SEPARATOR + y);
+	}
+
+	/**
+	 * The player who is being attacked will send this message to
+	 * the attacking player with the coordinate of the ship that they hit.
+	 *
+	 * @param sender
+	 * @param x      The horizontal coordinate.
+	 * @param y      The vertical coordinate.
+	 */
+	public static void sendHit(PrintWriter sender, int x, int y) {
+		sender.println(HIT + SEPARATOR + x + SEPARATOR + y);
+	}
+
+	/**
+	 * The player who is currently attacking will use this method once they
+	 * click a position on the OppGrid, indicating that they wish to attack
+	 * at that location.
+	 *
+	 * @param sender
+	 * @param x      The horizontal coordinate.
+	 * @param y      The vertical coordinate.
+	 */
+	public static void sendAttack(PrintWriter sender, int x, int y) {
+		sender.println(ATTACK + SEPARATOR + x + SEPARATOR + y);
+	}
 
     /**
      * @param sender      The client's PrintWriter, which is connected to {@link server.JavashipsServer}.
@@ -68,6 +109,16 @@ public final class JavashipsProtocol {
 	 */
 	public static void sendRedraw(PrintWriter sender) {
 		sender.println(REDRAW);
+	}
+
+	/**
+	 * The server will send the client that connects first this message so that client knows
+	 * it will attack first.
+	 *
+	 * @param sender
+	 */
+	public static void sendFirstAttacker(PrintWriter sender) {
+		sender.println(FIRST);
 	}
 }
 

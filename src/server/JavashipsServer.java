@@ -8,6 +8,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 
+import static protocol.JavashipsProtocol.FIRST;
+import static protocol.JavashipsProtocol.QUIT;
+
 public class JavashipsServer {
     private final int PORT = 9876;
 
@@ -30,6 +33,8 @@ public class JavashipsServer {
                     player1.playerSocket.getInetAddress().getHostAddress() +
                     "/" +
                     player1.playerSocket.getPort());
+
+            player1.setFirstAttacker();
 
             Player player2 = new Player(server.accept(), "Player 2");
             System.out.println(new Date().toString() +
@@ -72,6 +77,7 @@ public class JavashipsServer {
         private BufferedReader commandReader;
 
         private PrintWriter toOpponentCommandWriter;
+        private PrintWriter toPlayerCommandWriter;
 
         private String name;
 
@@ -86,6 +92,8 @@ public class JavashipsServer {
 
             commandReader = new BufferedReader(
                     new InputStreamReader(playerSocket.getInputStream()));
+            toPlayerCommandWriter = new PrintWriter(
+                    playerSocket.getOutputStream());
         }
 
         /**
@@ -122,6 +130,13 @@ public class JavashipsServer {
             toOpponentCommandWriter.println(command);
         }
 
+        /**
+         * Tell this player that they are attacking first.
+         */
+        void setFirstAttacker() {
+            toPlayerCommandWriter.println(FIRST);
+        }
+
         @Override
         public void run() {
 
@@ -130,13 +145,21 @@ public class JavashipsServer {
             while (true) {
                 try {
                     command = getCommandFromPlayer();
+
                     if (command == null) {
                         System.out.println(new Date().toString() + " - " + name + " connection lost.");
                         return;
                     }
                     if (!command.isEmpty()) {
                         System.out.println(new Date().toString() + " :: " + command);
+
                         sendCommandToOpponent(command);
+
+                        // If the player quits the game, then stop this thread.
+                        // Has to happen after the command gets sent or else the other player won't quit.
+                        if (command.equals(QUIT)) {
+                            return;
+                        }
                     }
                 } catch (IOException e) {
                     System.err.println(new Date().toString() + " - " + name + " connection lost.");
