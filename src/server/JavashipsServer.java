@@ -19,7 +19,7 @@ public class JavashipsServer {
      * that facilitates the sendMessage passing between
      * clients. All game logic is processed client-side.
      */
-    public JavashipsServer() {
+    private JavashipsServer() {
         try {
             PrintWriter serverWriter;
 
@@ -123,7 +123,7 @@ public class JavashipsServer {
         /**
          * @param command The command that getCommandFromPlayer
          *                receives is to be sent to the opponent's
-         *                client for parsing.
+         *                client.
          * @throws IOException
          */
         void sendCommandToOpponent(final String command) throws IOException {

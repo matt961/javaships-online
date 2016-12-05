@@ -882,9 +882,9 @@ public class JavashipsClient {
 					receivedParsed = received.split(SEPARATOR);
 				} catch (IOException e) {
 					System.err.println(e.toString());
-					System.out.println("\nYour opponent has disconnected.");
-					chatArea.append("Your opponent has disconnected.");
-					return;
+                    System.out.println("Your opponent has disconnected.");
+                    chatArea.append("Your opponent has disconnected.\n");
+                    return;
 				}
 
 					System.out.print(new Date().toString() + " - Received");
@@ -928,8 +928,8 @@ public class JavashipsClient {
 									draw();
 									break;
 								default:
-									sendHit(commandWriter, x, y);
-									PlayerGrid[x][y] = GridValue.HIT;
+                                    sendHit(commandWriter, x, y, PlayerGrid[x][y]);
+                                    PlayerGrid[x][y] = GridValue.HIT;
 									draw();
 									break;
 							}
@@ -941,9 +941,12 @@ public class JavashipsClient {
 						case HIT:
 							x = Integer.parseInt(receivedParsed[1]);
 							y = Integer.parseInt(receivedParsed[2]);
+                            String shipHit = receivedParsed[3];
 
 							OppGrid[x][y] = GridValue.HIT;
 							draw();
+
+                            chatArea.append("Opponent: You hit my " + shipHit + "! :^(\n");
 
 							break;
 
@@ -1008,8 +1011,8 @@ public class JavashipsClient {
 	// ====================================================================================================================
 
 	// grid values
-	private enum GridValue {
-		CARRIER(0),
+    public enum GridValue {
+        CARRIER(0),
 		BATTLESHIP(1),
 		CRUISER(2),
 		SUBMARINE(3),

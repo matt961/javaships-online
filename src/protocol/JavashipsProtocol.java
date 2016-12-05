@@ -1,5 +1,7 @@
 package protocol;
 
+import client.JavashipsClient;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -42,9 +44,10 @@ public final class JavashipsProtocol {
 	 * @param sender
 	 * @param x      The horizontal coordinate.
 	 * @param y      The vertical coordinate.
+	 * @param ship   Type of ship that your opponent hit.
 	 */
-	public static void sendHit(PrintWriter sender, int x, int y) {
-		sender.println(HIT + SEPARATOR + x + SEPARATOR + y);
+	public static void sendHit(PrintWriter sender, int x, int y, JavashipsClient.GridValue ship) {
+		sender.println(HIT + SEPARATOR + x + SEPARATOR + y + SEPARATOR + ship.toString());
 	}
 
 	/**
