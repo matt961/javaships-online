@@ -22,12 +22,12 @@ import static protocol.JavashipsProtocol.*;
 public class JavashipsClient {
 
 	// create variables for grids and buttons
-	public GridValue[][] OppGrid;
-	public JButton[][] OppButtons;
-	public GridValue[][] PlayerGrid;
-	public JButton[][] PlayerButtons;
-	public JButton[] shipButtons = new JButton[5];
-	JTextArea chatArea;
+	private GridValue[][] OppGrid;
+	private JButton[][] OppButtons;
+	private GridValue[][] PlayerGrid;
+	private JButton[][] PlayerButtons;
+	private JButton[] shipButtons = new JButton[5];
+	private JTextArea chatArea;
 
 	// Use these for communicating with your opponent.
 	private Socket server;
@@ -40,10 +40,21 @@ public class JavashipsClient {
 
 	// create state variables for game play
 	private boolean isFirstAttacker;
+	private boolean opponentReady;
+	private boolean sentReady;
 	private GameState gameState = GameState.NOGAME;
 	private GridValue placeState = GridValue.EMPTY;
 	private Orientation placeOrient = Orientation.VERTICAL;
+
+	private int
+			hpBATTLESHIP,
+			hpCRUISER,
+			hpDESTROYER,
+			hpSUBMARINE,
+			hpCARRIER;
+
 	private JFrame frame;
+	private JFrame messagePane;
 	private JTextField ChatTextField;
 	private JLabel GameStateText;
 	private JMenuItem mntmStartGame;
@@ -52,7 +63,7 @@ public class JavashipsClient {
 	/**
 	 * Create the application.
 	 */
-	public JavashipsClient() {
+	private JavashipsClient() {
 		initialize();
 	}
 
@@ -70,6 +81,7 @@ public class JavashipsClient {
 	private void initialize() {
 		hasConnection = false;
 		isFirstAttacker = false;
+		opponentReady = false;
 
 		frame = new JFrame();
 		frame.setResizable(false);
@@ -283,11 +295,13 @@ public class JavashipsClient {
 				if (placeState != GridValue.CARRIER) {
 					placeOrient = Orientation.HORIZONTAL;
 					GameStateText.setText("Place CARRIER HORIZONTAL (Click again for VERTICAL)");
-				} else {
+				}
+				else {
 					if (placeOrient == Orientation.HORIZONTAL) {
 						placeOrient = Orientation.VERTICAL;
 						GameStateText.setText("Place CARRIER VERTICAL (Click again for VERTICAL)");
-					} else {
+					}
+					else {
 						placeOrient = Orientation.HORIZONTAL;
 						GameStateText.setText("Place CARRIER HORIZONTAL (Click again for HORIZONTAL)");
 					}
@@ -307,11 +321,13 @@ public class JavashipsClient {
 				if (placeState != GridValue.BATTLESHIP) {
 					placeOrient = Orientation.HORIZONTAL;
 					GameStateText.setText("Place BATTLESHIP HORIZONTAL (Click again for VERTICAL)");
-				} else {
+				}
+				else {
 					if (placeOrient == Orientation.HORIZONTAL) {
 						placeOrient = Orientation.VERTICAL;
 						GameStateText.setText("Place BATTLESHIP VERTICAL (Click again for VERTICAL)");
-					} else {
+					}
+					else {
 						placeOrient = Orientation.HORIZONTAL;
 						GameStateText.setText("Place BATTLESHIP HORIZONTAL (Click again for HORIZONTAL)");
 					}
@@ -331,11 +347,13 @@ public class JavashipsClient {
 				if (placeState != GridValue.CRUISER) {
 					placeOrient = Orientation.HORIZONTAL;
 					GameStateText.setText("Place CRUISER HORIZONTAL (Click again for VERTICAL)");
-				} else {
+				}
+				else {
 					if (placeOrient == Orientation.HORIZONTAL) {
 						placeOrient = Orientation.VERTICAL;
 						GameStateText.setText("Place CRUISER VERTICAL (Click again for VERTICAL)");
-					} else {
+					}
+					else {
 						placeOrient = Orientation.HORIZONTAL;
 						GameStateText.setText("Place CRUISER HORIZONTAL (Click again for HORIZONTAL)");
 					}
@@ -355,11 +373,13 @@ public class JavashipsClient {
 				if (placeState != GridValue.SUBMARINE) {
 					placeOrient = Orientation.HORIZONTAL;
 					GameStateText.setText("Place SUBMARINE HORIZONTAL (Click again for VERTICAL)");
-				} else {
+				}
+				else {
 					if (placeOrient == Orientation.HORIZONTAL) {
 						placeOrient = Orientation.VERTICAL;
 						GameStateText.setText("Place SUBMARINE VERTICAL (Click again for VERTICAL)");
-					} else {
+					}
+					else {
 						placeOrient = Orientation.HORIZONTAL;
 						GameStateText.setText("Place SUBMARINE HORIZONTAL (Click again for HORIZONTAL)");
 					}
@@ -379,11 +399,13 @@ public class JavashipsClient {
 				if (placeState != GridValue.DESTROYER) {
 					placeOrient = Orientation.HORIZONTAL;
 					GameStateText.setText("Place DESTROYER HORIZONTAL (Click again for VERTICAL)");
-				} else {
+				}
+				else {
 					if (placeOrient == Orientation.HORIZONTAL) {
 						placeOrient = Orientation.VERTICAL;
 						GameStateText.setText("Place DESTROYER VERTICAL (Click again for VERTICAL)");
-					} else {
+					}
+					else {
 						placeOrient = Orientation.HORIZONTAL;
 						GameStateText.setText("Place DESTROYER HORIZONTAL (Click again for HORIZONTAL)");
 					}
@@ -501,10 +523,12 @@ public class JavashipsClient {
 								break;
 							case PLAY:
 								if (button.getBackground().equals(GridColor.MISS.c) ||
-										button.getBackground().equals(GridColor.HIT.c))
+										button.getBackground().equals(GridColor.HIT.c)) {
 									; //do nothing
-								else
+								}
+								else {
 									button.setBackground(GridColor.SELECTED.c);
+								}
 
 								// SEND MOUSE OVER VALUE TO OPPONENT FOR FEAR FACTOR.
 								JButton seeked = (JButton) evt.getSource();
@@ -540,10 +564,12 @@ public class JavashipsClient {
 								break;
 							case PLAY:
 								if (button.getBackground().equals(GridColor.MISS.c) ||
-										button.getBackground().equals(GridColor.HIT.c))
+										button.getBackground().equals(GridColor.HIT.c)) {
 									; //do nothing
-								else
+								}
+								else {
 									button.setBackground(GridColor.EMPTY.c);
+								}
 
 								sendRedraw(commandWriter);
 								break;
@@ -577,7 +603,8 @@ public class JavashipsClient {
 												sendAttack(commandWriter, x, y);
 												gameState = GameState.WAIT;
 												break;
-											} else {
+											}
+											else {
 												break;
 											}
 										}
@@ -620,12 +647,6 @@ public class JavashipsClient {
 		mntmQuitGame.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				gameState = GameState.NOGAME;
-
-				hasConnection = false;
-
-				sendQuit(commandWriter);
-
 				quitGame();
 			}
 		});
@@ -716,7 +737,8 @@ public class JavashipsClient {
 
 			try {
 				sendMessage(commandWriter, message);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -764,7 +786,7 @@ public class JavashipsClient {
 					}
 					shipButtons[placeState.num].setEnabled(false);
 					placeState = GridValue.EMPTY;
-					checkState();
+					checkStartGame();
 					draw();
 					return;
 				}
@@ -788,8 +810,10 @@ public class JavashipsClient {
 							for (x = 0; x < size; x++) {
 								if (PlayerGrid[i][j + x - offset] != GridValue.EMPTY) {
 									PlayerButtons[i][j + x - offset].setBackground(GridColor.HIT.c);
-								} else
+								}
+								else {
 									PlayerButtons[i][j + x - offset].setBackground(GridColor.SELECTED.c);
+								}
 							}
 							break;
 						// Vertical placement
@@ -800,8 +824,10 @@ public class JavashipsClient {
 							for (x = 0; x < size; x++) {
 								if (PlayerGrid[i + x - offset][j] != GridValue.EMPTY) {
 									PlayerButtons[i + x - offset][j].setBackground(GridColor.HIT.c);
-								} else
+								}
+								else {
 									PlayerButtons[i + x - offset][j].setBackground(GridColor.SELECTED.c);
+								}
 							}
 							break;
 						default:
@@ -814,7 +840,7 @@ public class JavashipsClient {
 
 	}
 
-	public void checkState() {
+	private void checkStartGame() {
 		int i, j, count = 0;
 		for (i = 0; i < 10; i++) {
 			for (j = 0; j < 10; j++) {
@@ -824,15 +850,71 @@ public class JavashipsClient {
 			}
 		}
 		if (count == 17) {
+			if (!sentReady) {
+				sendReady(commandWriter);
+				sentReady = !sentReady;
+			}
 
-			if (isFirstAttacker)
+			if (isFirstAttacker && opponentReady) {
 				gameState = GameState.PLAY;
-			else
+			}
+			else {
 				gameState = GameState.WAIT;
+			}
 
 //			gameState = GameState.PLAY;
 			GameStateText.setText("You've placed all your ships!");
 		}
+	}
+
+	/**
+	 * If a ship's HP is 0, send your opponent a message.
+	 *
+	 * @param hitShip The type of ship that your opponent hit.
+	 * @throws Exception
+	 */
+	private void checkSunkenShips(String hitShip) throws Exception {
+		if (hitShip == null) {
+			throw new Exception("Can't process a null GridValue.");
+		}
+
+		if (hitShip.equals(GridValue.BATTLESHIP.toString())) {
+			if (hpBATTLESHIP <= 0) {
+				sendMessage(commandWriter, "Opponent: You sunk my BATTLESHIP! :(\n");
+			}
+		}
+		else if (hitShip.equals(GridValue.CARRIER.toString())) {
+			if (hpCARRIER <= 0) {
+				sendMessage(commandWriter, "Opponent: You sunk my CARRIER! :(\n");
+			}
+		}
+		else if (hitShip.equals(GridValue.CRUISER.toString())) {
+			if (hpCRUISER <= 0) {
+				sendMessage(commandWriter, "Opponent: You sunk my CRUISER! :(\n");
+			}
+		}
+		else if (hitShip.equals(GridValue.DESTROYER.toString())) {
+			if (hpDESTROYER <= 0) {
+				sendMessage(commandWriter, "Opponent: You sunk my DESTROYER! :(\n");
+			}
+		}
+		else if (hitShip.equals(GridValue.SUBMARINE.toString())) {
+			if (hpSUBMARINE <= 0) {
+				sendMessage(commandWriter, "Opponent: You sunk my SUBMARINE! :(\n");
+			}
+		}
+		else {
+			throw new Exception("Should never happen. None of the hitShip values were actually a ship.");
+		}
+	}
+
+	/**
+	 * If all ship hit points summed is 0, then the other player has killed all of your ships! :(
+	 *
+	 * @return true if all ships are killed.
+	 */
+	private boolean checkIfLost() {
+		return ((hpSUBMARINE + hpDESTROYER + hpCRUISER + hpCARRIER + hpBATTLESHIP) <= 0);
 	}
 
 	// ====================================================================================================================
@@ -840,7 +922,9 @@ public class JavashipsClient {
 	// ERROR if ship already exists at the location ship is to be place
 	// ====================================================================================================================
 
-	public void startGame() {
+	private void startGame() {
+		sentReady = false;
+
 		networkListener = new JavashipsNetworkingThread();
 		networkListener.start();
 
@@ -848,139 +932,22 @@ public class JavashipsClient {
 			shipButtons[i].setEnabled(true);
 		}
 		mntmQuitGame.setEnabled(true);
+
+		hpBATTLESHIP = 4;
+		hpCARRIER = 5;
+		hpCRUISER = 3;
+		hpSUBMARINE = 3;
+		hpDESTROYER = 2;
 	}
 
-	/**
-	 * A thread  used for monitoring incoming traffic from the {@link server.JavashipsServer}
-	 */
-	class JavashipsNetworkingThread extends Thread {
-		@Override
-		public void run() {
-			try {
-				server = new Socket(host, port);
+	private void quitGame() {
+		gameState = GameState.NOGAME;
+		opponentReady = false;
 
-				commandWriter = new PrintWriter(
-						server.getOutputStream(), true);
-
-				commandReader =
-						new BufferedReader(
-								new InputStreamReader(
-										server.getInputStream()
-								));
-
-				hasConnection = true;
-
-
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
-
-			while (hasConnection) {
-				String[] receivedParsed;
-				try {
-					String received = commandReader.readLine();
-					receivedParsed = received.split(SEPARATOR);
-				} catch (IOException e) {
-					System.err.println(e.toString());
-                    System.out.println("Your opponent has disconnected.");
-                    chatArea.append("Your opponent has disconnected.\n");
-                    return;
-				}
-
-					System.out.print(new Date().toString() + " - Received");
-					for (String s : receivedParsed) {
-						System.out.print(" - ");
-						System.out.print(s);
-					}
-					System.out.println();
-
-					int x;
-					int y;
-
-					switch (receivedParsed[0]) {
-						case MESSAGE:
-							chatArea.append("Opponent: " + receivedParsed[1] + "\n");
-							break;
-
-						case FIRST:
-							isFirstAttacker = true;
-							break;
-
-						case SEEKING:
-							x = Integer.parseInt(receivedParsed[1]);
-							y = Integer.parseInt(receivedParsed[2]);
-
-							PlayerButtons[x][y].setBackground(GridColor.SEEKING.c);
-							break;
-
-						case REDRAW:
-							draw();
-							break;
-
-						case ATTACK:
-							x = Integer.parseInt(receivedParsed[1]);
-							y = Integer.parseInt(receivedParsed[2]);
-
-							switch (PlayerGrid[x][y]) {
-								case EMPTY:
-									sendMiss(commandWriter, x, y);
-									PlayerGrid[x][y] = GridValue.MISS;
-									draw();
-									break;
-								default:
-                                    sendHit(commandWriter, x, y, PlayerGrid[x][y]);
-                                    PlayerGrid[x][y] = GridValue.HIT;
-									draw();
-									break;
-							}
-
-							gameState = GameState.PLAY;
-
-							break;
-
-						case HIT:
-							x = Integer.parseInt(receivedParsed[1]);
-							y = Integer.parseInt(receivedParsed[2]);
-                            String shipHit = receivedParsed[3];
-
-							OppGrid[x][y] = GridValue.HIT;
-							draw();
-
-                            chatArea.append("Opponent: You hit my " + shipHit + "! :^(\n");
-
-							break;
-
-						case MISS:
-							x = Integer.parseInt(receivedParsed[1]);
-							y = Integer.parseInt(receivedParsed[2]);
-
-							OppGrid[x][y] = GridValue.MISS;
-							draw();
-
-							break;
-
-						case QUIT:
-							quitGame();
-							hasConnection = false;
-							break;
-
-						default:
-							break;
-					}
-			}
-
-		}
-	}
-
-	// ====================================================================================================================
-	// PLACE SHIP FUNCTION to change the state of the Player grid
-	// ERROR if ship already exists at the location ship is to be place
-	// ====================================================================================================================
-
-	public void quitGame() {
 		for (int i = 0; i < 5; i++) {
 			shipButtons[i].setEnabled(false);
 		}
+
 		int i, j;
 		for (i = 0; i < 10; i++) {
 			for (j = 0; j < 10; j++) {
@@ -988,6 +955,32 @@ public class JavashipsClient {
 				PlayerGrid[i][j] = GridValue.EMPTY;
 			}
 		}
+
+		mntmStartGame.setEnabled(true);
+		mntmQuitGame.setEnabled(false);
+		draw();
+
+
+		sendQuit(commandWriter);
+		closeConnection();
+	}
+
+	private void gameOver() {
+		gameState = GameState.NOGAME;
+		opponentReady = false;
+
+		for (int i = 0; i < 5; i++) {
+			shipButtons[i].setEnabled(false);
+		}
+
+		int i, j;
+		for (i = 0; i < 10; i++) {
+			for (j = 0; j < 10; j++) {
+				OppGrid[i][j] = GridValue.EMPTY;
+				PlayerGrid[i][j] = GridValue.EMPTY;
+			}
+		}
+
 		mntmStartGame.setEnabled(true);
 		mntmQuitGame.setEnabled(false);
 		draw();
@@ -995,24 +988,26 @@ public class JavashipsClient {
 		closeConnection();
 	}
 
-	public void closeConnection() {
+	// ====================================================================================================================
+	// PLACE SHIP FUNCTION to change the state of the Player grid
+	// ERROR if ship already exists at the location ship is to be place
+	// ====================================================================================================================
+
+	private void closeConnection() {
 		try {
+			hasConnection = false;
 			server.close();
 			commandWriter.close();
 			commandReader.close();
-		} catch (IOException ioe) {
+		}
+		catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
 	}
 
-	// ====================================================================================================================
-	// HOVER SELECT SHIP FUNCTION to change the state of the Player grid
-	// DISPLAY RED if ship already exists at the location ship is to be place
-	// ====================================================================================================================
-
 	// grid values
-    public enum GridValue {
-        CARRIER(0),
+	public enum GridValue {
+		CARRIER(0),
 		BATTLESHIP(1),
 		CRUISER(2),
 		SUBMARINE(3),
@@ -1029,6 +1024,11 @@ public class JavashipsClient {
 			this.num = num;
 		}
 	}
+
+	// ====================================================================================================================
+	// HOVER SELECT SHIP FUNCTION to change the state of the Player grid
+	// DISPLAY RED if ship already exists at the location ship is to be place
+	// ====================================================================================================================
 
 	// enum for GridColors
 	public enum GridColor {
@@ -1057,5 +1057,190 @@ public class JavashipsClient {
 	private enum Orientation {
 		HORIZONTAL,
 		VERTICAL
+	}
+
+	/**
+	 * A thread  used for monitoring incoming traffic from the {@link server.JavashipsServer}
+	 */
+	class JavashipsNetworkingThread extends Thread {
+		@Override
+		public void run() {
+			try {
+				server = new Socket(host, port);
+
+				commandWriter = new PrintWriter(
+						server.getOutputStream(), true);
+
+				commandReader =
+						new BufferedReader(
+								new InputStreamReader(
+										server.getInputStream()
+								));
+
+				hasConnection = true;
+
+
+			}
+			catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+
+			while (hasConnection) {
+				String[] receivedParsed;
+				try {
+					String received = commandReader.readLine();
+					receivedParsed = received.split(SEPARATOR);
+				}
+				catch (IOException e) {
+					System.err.println(e.toString());
+					System.out.println("Your opponent has disconnected.");
+					chatArea.append("Your opponent has disconnected.\n");
+					return;
+				}
+
+				System.out.print(new Date().toString() + " - Received");
+				for (String s : receivedParsed) {
+					System.out.print(" - ");
+					System.out.print(s);
+				}
+				System.out.println();
+
+				int x;
+				int y;
+
+				switch (receivedParsed[0]) {
+					case MESSAGE:
+						chatArea.append("Opponent: " + receivedParsed[1] + "\n");
+						break;
+
+					case FIRST:
+						isFirstAttacker = true;
+						break;
+
+					case READY:
+						opponentReady = true;
+						checkStartGame();
+						break;
+
+					case SEEKING:
+						x = Integer.parseInt(receivedParsed[1]);
+						y = Integer.parseInt(receivedParsed[2]);
+
+						PlayerButtons[x][y].setBackground(GridColor.SEEKING.c);
+						break;
+
+					case REDRAW:
+						draw();
+						break;
+
+					case ATTACK:
+						x = Integer.parseInt(receivedParsed[1]);
+						y = Integer.parseInt(receivedParsed[2]);
+
+						switch (PlayerGrid[x][y]) {
+							case EMPTY:
+								sendMiss(commandWriter, x, y);
+								PlayerGrid[x][y] = GridValue.MISS;
+								draw();
+								break;
+							default:
+								String shipHit = PlayerGrid[x][y].toString();
+
+								sendHit(commandWriter, x, y, PlayerGrid[x][y]);
+								PlayerGrid[x][y] = GridValue.HIT;
+								draw();
+
+								if (shipHit.equals(GridValue.BATTLESHIP.toString())) {
+									hpBATTLESHIP--;
+								}
+								else if (shipHit.equals(GridValue.CARRIER.toString())) {
+									hpCARRIER--;
+								}
+								else if (shipHit.equals(GridValue.CRUISER.toString())) {
+									hpCRUISER--;
+								}
+								else if (shipHit.equals(GridValue.DESTROYER.toString())) {
+									hpDESTROYER--;
+								}
+								else if (shipHit.equals(GridValue.SUBMARINE.toString())) {
+									hpSUBMARINE--;
+								}
+								else {
+									try {
+										throw new Exception("Ship hit is not known or wasn't sent!");
+									}
+									catch (Exception e) {
+										e.printStackTrace();
+									}
+								}
+
+								try {
+									checkSunkenShips(shipHit);
+								}
+								catch (Exception e) {
+									e.printStackTrace();
+								}
+
+								if (checkIfLost()) {
+									sendGameOver(commandWriter);
+									JOptionPane.showMessageDialog(frame, "You lost, nerd!", "GG!",
+											JOptionPane.INFORMATION_MESSAGE);
+									gameOver();
+								}
+
+								break;
+						}
+
+						gameState = GameState.PLAY;
+
+						break;
+
+					case HIT:
+						x = Integer.parseInt(receivedParsed[1]);
+						y = Integer.parseInt(receivedParsed[2]);
+
+						String shipHit = receivedParsed[3];
+
+						OppGrid[x][y] = GridValue.HIT;
+						draw();
+
+						try {
+							chatArea.append("Opponent: You hit my " + shipHit + "! :^(\n");
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+
+						break;
+
+					case MISS:
+						x = Integer.parseInt(receivedParsed[1]);
+						y = Integer.parseInt(receivedParsed[2]);
+
+						OppGrid[x][y] = GridValue.MISS;
+						draw();
+
+						break;
+
+					case QUIT:
+						quitGame();
+						JOptionPane.showMessageDialog(frame,
+								"Your opponent has quit the game. Sad!", "Game over",
+								JOptionPane.INFORMATION_MESSAGE);
+						break;
+
+					case GAMEOVER:
+						JOptionPane.showMessageDialog(frame,
+								"You won!", "GG!",
+								JOptionPane.INFORMATION_MESSAGE);
+						gameOver();
+						break;
+
+					default:
+						break;
+				}
+			}
+
+		}
 	}
 }
