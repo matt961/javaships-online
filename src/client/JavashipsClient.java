@@ -35,13 +35,11 @@ public class JavashipsClient {
 	private BufferedReader commandReader;
 	private String host = "127.0.0.1";
 	private int port = 9876;
-	private Thread networkListener = new JavashipsNetworkingThread();
-	//TODO: HELP MEEEEE
-	private static volatile boolean hasConnection;
+	private Thread networkListener;
+	private volatile boolean hasConnection;
 
 	// create state variables for game play
-	//TODO: HELP MEEEEEEEEEEEEEEEEEEEEEEEEEEE
-	private static volatile boolean isFirstAttacker;
+	private boolean isFirstAttacker;
 	private GameState gameState = GameState.NOGAME;
 	private GridValue placeState = GridValue.EMPTY;
 	private Orientation placeOrient = Orientation.VERTICAL;
@@ -70,7 +68,6 @@ public class JavashipsClient {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		//TODO: not sure if this is necessary here...
 		hasConnection = false;
 		isFirstAttacker = false;
 
@@ -503,8 +500,11 @@ public class JavashipsClient {
 							case WAIT:
 								break;
 							case PLAY:
-								//TODO: stop this from painting over hits/misses
-								button.setBackground(GridColor.SELECTED.c);
+								if (button.getBackground().equals(GridColor.MISS.c) ||
+										button.getBackground().equals(GridColor.HIT.c))
+									; //do nothing
+								else
+									button.setBackground(GridColor.SELECTED.c);
 
 								// SEND MOUSE OVER VALUE TO OPPONENT FOR FEAR FACTOR.
 								JButton seeked = (JButton) evt.getSource();
@@ -539,9 +539,11 @@ public class JavashipsClient {
 							case WAIT:
 								break;
 							case PLAY:
-								//TODO: stop this from painting over hits and misses
-								// Set state back to normal
-								button.setBackground(GridColor.EMPTY.c);
+								if (button.getBackground().equals(GridColor.MISS.c) ||
+										button.getBackground().equals(GridColor.HIT.c))
+									; //do nothing
+								else
+									button.setBackground(GridColor.EMPTY.c);
 
 								sendRedraw(commandWriter);
 								break;
@@ -581,6 +583,8 @@ public class JavashipsClient {
 										}
 									}
 								}
+
+								sendRedraw(commandWriter);
 
 								break;
 
@@ -675,6 +679,7 @@ public class JavashipsClient {
 						break;
 					case SEEKING:
 						PlayerButtons[i][j].setBackground(GridColor.SEEKING.c);
+						break;
 				}
 				// draw players grid
 				switch (PlayerGrid[i][j]) {
@@ -684,6 +689,9 @@ public class JavashipsClient {
 						break;
 					case HIT:
 						PlayerButtons[i][j].setBackground(GridColor.HIT.c);
+						break;
+					case MISS:
+						PlayerButtons[i][j].setBackground(GridColor.MISS.c);
 						break;
 					case SELECTED:
 						PlayerButtons[i][j].setBackground(GridColor.SELECTED.c);
@@ -817,12 +825,12 @@ public class JavashipsClient {
 		}
 		if (count == 17) {
 
-			//TODO: Figure out how to let the networking thread change isFirstAttacker boolean
-//			if (isFirstAttacker)
-//				gameState = GameState.PLAY;
-//			else
-//				gameState = GameState.WAIT;
-			gameState = GameState.PLAY;
+			if (isFirstAttacker)
+				gameState = GameState.PLAY;
+			else
+				gameState = GameState.WAIT;
+
+//			gameState = GameState.PLAY;
 			GameStateText.setText("You've placed all your ships!");
 		}
 	}
@@ -833,11 +841,13 @@ public class JavashipsClient {
 	// ====================================================================================================================
 
 	public void startGame() {
+		networkListener = new JavashipsNetworkingThread();
 		networkListener.start();
 
 		for (int i = 0; i < 5; i++) {
 			shipButtons[i].setEnabled(true);
 		}
+		mntmQuitGame.setEnabled(true);
 	}
 
 	/**
@@ -866,10 +876,16 @@ public class JavashipsClient {
 			}
 
 			while (hasConnection) {
+				String[] receivedParsed;
 				try {
-
 					String received = commandReader.readLine();
-					String[] receivedParsed = received.split(SEPARATOR);
+					receivedParsed = received.split(SEPARATOR);
+				} catch (IOException e) {
+					System.err.println(e.toString());
+					System.out.println("\nYour opponent has disconnected.");
+					chatArea.append("Your opponent has disconnected.");
+					return;
+				}
 
 					System.out.print(new Date().toString() + " - Received");
 					for (String s : receivedParsed) {
@@ -902,16 +918,19 @@ public class JavashipsClient {
 							break;
 
 						case ATTACK:
-							//TODO: paint the player's grid with hits/misses
 							x = Integer.parseInt(receivedParsed[1]);
 							y = Integer.parseInt(receivedParsed[2]);
 
 							switch (PlayerGrid[x][y]) {
 								case EMPTY:
 									sendMiss(commandWriter, x, y);
+									PlayerGrid[x][y] = GridValue.MISS;
+									draw();
 									break;
 								default:
 									sendHit(commandWriter, x, y);
+									PlayerGrid[x][y] = GridValue.HIT;
+									draw();
 									break;
 							}
 
@@ -939,14 +958,12 @@ public class JavashipsClient {
 
 						case QUIT:
 							quitGame();
-							return;
+							hasConnection = false;
+							break;
 
 						default:
 							break;
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 			}
 
 		}
@@ -977,8 +994,9 @@ public class JavashipsClient {
 
 	public void closeConnection() {
 		try {
-			hasConnection = false;
 			server.close();
+			commandWriter.close();
+			commandReader.close();
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}

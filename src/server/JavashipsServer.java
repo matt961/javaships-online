@@ -93,7 +93,7 @@ public class JavashipsServer {
             commandReader = new BufferedReader(
                     new InputStreamReader(playerSocket.getInputStream()));
             toPlayerCommandWriter = new PrintWriter(
-                    playerSocket.getOutputStream());
+                    playerSocket.getOutputStream(), true);
         }
 
         /**
