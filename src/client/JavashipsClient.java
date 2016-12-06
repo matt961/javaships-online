@@ -924,6 +924,7 @@ public class JavashipsClient {
 
 	private void startGame() {
 		sentReady = false;
+		isFirstAttacker = false;
 
 		networkListener = new JavashipsNetworkingThread();
 		networkListener.start();
