@@ -880,27 +880,27 @@ public class JavashipsClient {
 
 		if (hitShip.equals(GridValue.BATTLESHIP.toString())) {
 			if (hpBATTLESHIP <= 0) {
-				sendMessage(commandWriter, "Opponent: You sunk my BATTLESHIP! :(\n");
+				sendMessage(commandWriter, "You sunk my BATTLESHIP!\n");
 			}
 		}
 		else if (hitShip.equals(GridValue.CARRIER.toString())) {
 			if (hpCARRIER <= 0) {
-				sendMessage(commandWriter, "Opponent: You sunk my CARRIER! :(\n");
+				sendMessage(commandWriter, "You sunk my CARRIER!\n");
 			}
 		}
 		else if (hitShip.equals(GridValue.CRUISER.toString())) {
 			if (hpCRUISER <= 0) {
-				sendMessage(commandWriter, "Opponent: You sunk my CRUISER! :(\n");
+				sendMessage(commandWriter, "You sunk my CRUISER!\n");
 			}
 		}
 		else if (hitShip.equals(GridValue.DESTROYER.toString())) {
 			if (hpDESTROYER <= 0) {
-				sendMessage(commandWriter, "Opponent: You sunk my DESTROYER! :(\n");
+				sendMessage(commandWriter, "You sunk my DESTROYER! :(\n");
 			}
 		}
 		else if (hitShip.equals(GridValue.SUBMARINE.toString())) {
 			if (hpSUBMARINE <= 0) {
-				sendMessage(commandWriter, "Opponent: You sunk my SUBMARINE! :(\n");
+				sendMessage(commandWriter, "You sunk my SUBMARINE! :(\n");
 			}
 		}
 		else {
@@ -1205,7 +1205,7 @@ public class JavashipsClient {
 						draw();
 
 						try {
-							chatArea.append("Opponent: You hit my " + shipHit + "! :^(\n");
+							chatArea.append("Opponent: You hit my " + shipHit + "!\n");
 						}
 						catch (Exception e) {
 							e.printStackTrace();
