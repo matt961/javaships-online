@@ -524,7 +524,7 @@ public class JavashipsClient {
 							case PLAY:
 								if (button.getBackground().equals(GridColor.MISS.c) ||
 										button.getBackground().equals(GridColor.HIT.c)) {
-									; //do nothing
+									//do nothing
 								}
 								else {
 									button.setBackground(GridColor.SELECTED.c);
@@ -565,7 +565,7 @@ public class JavashipsClient {
 							case PLAY:
 								if (button.getBackground().equals(GridColor.MISS.c) ||
 										button.getBackground().equals(GridColor.HIT.c)) {
-									; //do nothing
+									//do nothing
 								}
 								else {
 									button.setBackground(GridColor.EMPTY.c);
@@ -661,6 +661,7 @@ public class JavashipsClient {
 		mntmExit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				quitGame();
 				System.exit(0);
 			}
 		});
